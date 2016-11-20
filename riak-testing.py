@@ -1,7 +1,7 @@
 import riak 
 
+#basic functionality testing - read, write, delete objects
 myClient = riak.RiakClient(pb_port=12101, protocol='pbc')
-
 myBucket = myClient.bucket('test')
 
 val1 = "one"
@@ -38,3 +38,33 @@ fetched3.delete()
 assert myBucket.get('one').exists == False
 assert myBucket.get('two').exists == False
 assert myBucket.get('three').exists == False
+
+
+#sibling explosion simulation
+client1 = riak.RiakClient(pb_port=12101, protocol='pbc')
+client2 = riak.RiakClient(pb_port=12102, protocol='pbc')
+
+bucket1 = client1.bucket('test1')
+bucket2 = client2.bucket('test2')
+
+key1 = bucket1.new("a", "Bob")
+key1.store()
+fetched1 = bucket1.get("a")
+
+key2 = bucket2.new("a", "Sue")
+key2.store()
+fetched2 = bucket1.get("a")
+
+fetched1.data = "Rita"
+fetched1.store()
+
+fetched2.data = "Michelle"
+fetched2.store()
+
+print myBucket.get("a")
+
+#enable dotted vec
+
+riak-admin bucket-type dotted_vec '{"props":{"dvv_enabled":true}}'
+riak-admin bucket-type dotted_vec
+
