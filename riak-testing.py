@@ -3,26 +3,27 @@ import riak
 
 class Availabilitytests(unittest.TestCase):
 
-	def test_shouldFailToRead(self):
-		#basic functionality testing - read, write, delete objects
-		myClient = riak.RiakClient(pb_port=12101, protocol='pbc')
-		myBucket = myClient.bucket('test')
+	@classmethod
+	def setUpClass(self):
+		self.myClient = riak.RiakClient(pb_port=12101, protocol='pbc')
+		self.myBucket = self.myClient.bucket('test')
 
+	def test_writing_and_reading(self):
 		val1 = "one"
-		key1 = myBucket.new('one', data=val1)
+		key1 = self.myBucket.new('one', data=val1)
 		key1.store()
 
 		val2 = "two"
-		key2 = myBucket.new('two', data=val2)
+		key2 = self.myBucket.new('two', data=val2)
 		key2.store()
 
 		val3 = "three"
-		key3 = myBucket.new('three', data=val3)
+		key3 = self.myBucket.new('three', data=val3)
 		key3.store()
 
-		fetched1 = myBucket.get('one')
-		fetched2 = myBucket.get('two')
-		fetched3 = myBucket.get('three')
+		fetched1 = self.myBucket.get('one')
+		fetched2 = self.myBucket.get('two')
+		fetched3 = self.myBucket.get('three')
 
 		self.assertTrue(val1 == fetched1.data) 
 		self.assertTrue( val2 == fetched2.data)
@@ -32,16 +33,27 @@ class Availabilitytests(unittest.TestCase):
 		print fetched2.data
 		print fetched3.data
 
-		fetched3.data = "three"
+	def test_update(self):
+		fetched3 = self.myBucket.get('three')
+		fetched3.data = "four"
 		fetched3.store()
+
+		fetched4 = self.myBucket.get('three')
+
+		self.assertTrue("four" == fetched4.data) 
+
+	def test_delete(self):
+		fetched1 = self.myBucket.get('one')
+		fetched2 = self.myBucket.get('two')
+		fetched3 = self.myBucket.get('three')
 
 		fetched1.delete()
 		fetched2.delete()
 		fetched3.delete()
 
-		self.assertTrue( myBucket.get('one').exists == False)
-		self.assertTrue( myBucket.get('two').exists == False)
-		self.assertTrue( myBucket.get('three').exists == False)
+		self.assertTrue( self.myBucket.get('one').exists == False)
+		self.assertTrue( self.myBucket.get('two').exists == False)
+		self.assertTrue( self.myBucket.get('three').exists == False)
 
 def main():
 	unittest.main()
