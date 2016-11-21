@@ -47,31 +47,20 @@ class Availabilitytests(unittest.TestCase):
 		docker.stop(u'riak02')
 		docker.stop(u'riak03')
 
-		try:
-		  fetched1 = myBucket.get('one', r=3)
-		except Exception as e: 
-		  self.assertTrue(str(e) == "[Errno 61] Connection refused")
-		  print e
-
-		try:
+		
+		with self.assertRaises(Exception):
+			fetched1 = myBucket.get('one', r=3)
+		
+		with self.assertRaises(Exception):
 		  fetched2 = myBucket.get('two', r=3)
-		except Exception as e: 
-		  self.assertTrue( str(e) == "[Errno 61] Connection refused")
-		  print e
-
-		try:
+		
+		with self.assertRaises(Exception):
 		  fetched3 = myBucket.get('three', r=3)
-		except Exception as e: 
-		  self.assertTrue(str(e) == "[Errno 61] Connection refused")
-		  print e
-
-		try:
+		
+		with self.assertRaises(Exception):
 			val4 = "four"
 			key4 = myBucket.new('four', data=val4)
 			key4.store(w=3)
-		except Exception as e: 
-		  self.assertTrue(str(e) == "[Errno 61] Connection refused")
-		  print e
 
 		docker.start(u'riak01')
 		docker.start(u'riak02')
